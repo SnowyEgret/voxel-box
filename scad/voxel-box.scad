@@ -22,10 +22,9 @@ creeper=[
   [0,1,0,0,1,0]
 ];
 
-//For creating random pattern of holes
-margin=4;
-density=2;
-rands = rands(0,10,(width*width));
+random_pattern=[for([0:1:5]) rands(0,1,6)];
+  
+pattern=creeper;
 
 module box() {
   corners();
@@ -60,6 +59,15 @@ module bottom() {
       side();
 }
 
+module side() {
+  punch(pattern=pattern)
+  //different random pattern on each side
+  //punch(pattern=[for([0:1:5]) rands(0,1,6)])
+     radial_array(n=4)
+      translate([voxel/2,voxel/2])
+      quarterSide();
+}
+
 module corner(size=2*voxel) {
   difference() {
     translate([-voxel/2,-voxel/2,-voxel/2]) cube([size,size,size]);
@@ -69,31 +77,13 @@ module corner(size=2*voxel) {
   }
 }
 
-module side() {
-  punch(pattern=creeper)
-     radial_array(n=4)
-      translate([voxel/2,voxel/2])
-      quarterSide();
-}
-
-module rand_punch() {
-//    for(x=[-(width/2)+margin:1:(width/2)-margin]) {
-//      for(y=[-(width/2)+margin:1:(width/2)-margin]) {
-//        if(rands[(x*(width-2*margin))+y] < density) {
-//          translate([x*voxel+voxel/2, y*voxel+voxel/2, 0]) dye();
-//        }
-//      }     
-//    }
- // }
-}
-
 module punch(pattern) {
   difference() {
     children(0);
     translate([(-len(pattern)+1)*voxel/2,(-len(pattern[0])+1)*voxel/2]) //Centered
       for(i=[0:1:len(pattern)-1]) {
         for(j=[0:1:len(pattern[i])-1]) {
-          if(pattern[i][j]==1) {
+          if(pattern[i][j]>.5) {
             translate([i*voxel, j*voxel])
               dye();
           }
