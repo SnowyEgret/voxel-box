@@ -5,13 +5,22 @@ box();
 //bottom();
 //color("yellow") dyeChanfered();
 //color("blue") corner();
-//color("green") side();
+//side();
 //color("red") quarterSide();
 
 voxel=10;
-width=12;
+width=12        ;
 //Printed first at .1
 tol=.5;
+
+creeper=[
+  [1,1,0,0,1,1],
+  [1,1,0,0,1,1],
+  [0,0,1,1,0,0],
+  [0,1,1,1,1,0],
+  [0,1,1,1,1,0],
+  [0,1,0,0,1,0]
+];
 
 //For creating random pattern of holes
 margin=4;
@@ -20,10 +29,12 @@ rands = rands(0,10,(width*width));
 
 module box() {
   corners();
+  //four sides
   radial_array(n=4)
-    rotate([90,0,0])
-      bottom();
+    rotate([90,90,0])
+        bottom();
   bottom();
+  //Top
   mirror([1,0,0])
     mirror([0,0,1])
       bottom();
@@ -44,7 +55,9 @@ module negative_corner() {
 
 module bottom() {
   d=(width-1)/2*voxel;
-  color("blue") translate([0,0,-d]) side();
+  color("blue")
+    translate([0,0,-d])
+      side();
 }
 
 module corner(size=2*voxel) {
@@ -57,14 +70,13 @@ module corner(size=2*voxel) {
 }
 
 module side() {
-  difference() {
-    union() {
-      for(r=[0:90:270]) {
-        rotate(r, [0, 0, voxel]) translate([voxel/2, voxel/2, 0]) quarterSide();
-      }
-    }
-    //translate([voxel/2, voxel/2, 0]) dye();
-    
+  punch(pattern=creeper)
+     radial_array(n=4)
+      translate([voxel/2,voxel/2])
+      quarterSide();
+}
+
+module rand_punch() {
 //    for(x=[-(width/2)+margin:1:(width/2)-margin]) {
 //      for(y=[-(width/2)+margin:1:(width/2)-margin]) {
 //        if(rands[(x*(width-2*margin))+y] < density) {
@@ -72,6 +84,21 @@ module side() {
 //        }
 //      }     
 //    }
+ // }
+}
+
+module punch(pattern) {
+  difference() {
+    children(0);
+    translate([(-len(pattern)+1)*voxel/2,(-len(pattern[0])+1)*voxel/2]) //Centered
+      for(i=[0:1:len(pattern)-1]) {
+        for(j=[0:1:len(pattern[i])-1]) {
+          if(pattern[i][j]==1) {
+            translate([i*voxel, j*voxel])
+              dye();
+          }
+       }
+    }
   }
 }
 
@@ -79,8 +106,6 @@ module quarterSide(size=width*voxel/2) {
   difference() {
     translate([-voxel/2,-voxel/2,-voxel/2])
       cube([size, size, voxel-tol/2]);
-//    translate([size-voxel, size-voxel, 0])
-//      dye();
     //Remove row on edge
     for(x=[voxel:voxel:size]) {
       translate([size-x, size-voxel, 0]) dye();
@@ -123,10 +148,4 @@ module chanfer(size=.7*voxel) {
     faces=[[0,3,1], [2,3,0], [0,1,2], [1,3,2]],
     convexity=2);
 }
-
-//module rz(angle) {
-//  rotate([0,0,angle])
-//    children(0);
-//}
-
 
